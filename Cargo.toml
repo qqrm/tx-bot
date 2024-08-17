@@ -1,0 +1,15 @@
+[package]
+name = "test-bot"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dotenv = "0.15.0"
+num_cpus = "1.16.0"
+rand = "0.8.5"
+serial_test = "3.1.1"
+
+[profile.dev]
+debug = true
