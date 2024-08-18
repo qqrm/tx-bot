@@ -23,15 +23,16 @@ macro_rules! get_env {
 /// * `commission_change` - Allowed variation in commission, to be added or subtracted randomly.
 /// * `max_threads` - The maximum number of concurrent threads for sending transactions.
 ///
-#[derive(Debug, Clone)]
-pub(crate) struct EnvParams {
-    pub(crate) wallet: String,
-    pub(crate) token: String,
-    pub(crate) total_amount: i64,
-    pub(crate) max_transactions: usize,
-    pub(crate) commission: i64,
-    pub(crate) commission_change: i64,
-    pub(crate) max_threads: usize,
+#[derive(Debug, Clone, Default)]
+pub struct EnvParams {
+    pub wallet: String,
+    pub token: String,
+    pub total_amount: i64,
+    pub commission: i64,
+    pub commission_change: i64,
+    pub max_transactions: usize,
+    pub max_threads: usize,
+    pub price: i64,
 }
 
 impl EnvParams {
@@ -39,7 +40,7 @@ impl EnvParams {
     ///
     /// # Panics
     /// Panics if any environment variable is not set or cannot be parsed into the expected type.
-    pub(crate) fn read_env() -> Self {
+    pub fn read_env() -> Self {
         dotenv().ok();
 
         Self {
@@ -49,6 +50,7 @@ impl EnvParams {
             commission: get_env!("COMMISSION", i64),
             commission_change: get_env!("COMMISSION_CHANGE", i64),
             max_transactions: get_env!("MAX_TRANSACTIONS", usize),
+            price: get_env!("PRICE", i64),
             max_threads: {
                 let max_threads_env: usize = get_env!("MAX_THREADS", usize);
                 std::cmp::min(num_cpus::get(), max_threads_env)
@@ -87,7 +89,7 @@ mod tests {
 
     // Ensures cleanup after test completion (in case of panic)
     struct EnvironmentGuard;
- 
+
     impl Drop for EnvironmentGuard {
         fn drop(&mut self) {
             cleanup_env();
@@ -97,7 +99,7 @@ mod tests {
     #[test]
     #[serial]
     fn test_read_env_correctly() {
-        let _env_guard = EnvironmentGuard; 
+        let _env_guard = EnvironmentGuard;
         setup_env();
         let params = EnvParams::read_env();
         assert_eq!(params.wallet, "TestWallet");
